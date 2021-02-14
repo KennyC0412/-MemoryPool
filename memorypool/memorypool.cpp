@@ -73,9 +73,11 @@ void MemoryAlloc::initMem()
 
 void* MemoryAlloc::allocMem(size_t size)
 {
+	m.lock();
 	if (!pBuf) {
 		initMem();
 	 }
+	m.unlock();
 	MemoryBlock* pRet = nullptr;
 	if (nullptr == pHead) {//内存池用尽，从系统中分配一块内存
 		pRet = static_cast<MemoryBlock *>(malloc(size+sizeof(MemoryBlock)));
@@ -84,7 +86,7 @@ void* MemoryAlloc::allocMem(size_t size)
 		pRet->nRef = 1;
 		pRet->pAlloc = this;
 		pRet->pNext = nullptr;
-		xCout << pRet <<"\t" << pRet->nID << "  " << nSize << std::endl;
+	//	xCout << pRet <<"\t" << pRet->nID << "  " <<size<< std::endl;
 
 	}
 	else {//从内存池中取出一块内存
@@ -92,7 +94,7 @@ void* MemoryAlloc::allocMem(size_t size)
 		pHead = pHead->pNext;
 		assert(0 == pRet->nRef);
 		pRet->nRef = 1;
-		xCout << pRet <<"\t" << pRet->nID << "  " << nSize << std::endl;
+	//	xCout << pRet <<"\t" << pRet->nID << "  " << size << std::endl;
 	}
 	return reinterpret_cast<char *>(pRet) + sizeof(MemoryBlock);
 }
@@ -105,6 +107,8 @@ void MemoryAlloc::freeMem(void* p)
 		return;
 	}
 	if (pBlock->inPool) {
+		//头部经常被多个线程修改 出现线程安全问题概率较大
+		std::lock_guard<std::mutex> lk(m);	
 		pBlock->pNext = pHead;
 		pHead = pBlock;
 	}

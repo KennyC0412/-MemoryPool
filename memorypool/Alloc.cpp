@@ -2,7 +2,6 @@
 #include <cstdlib>
 #include "memorypool.h"
 
-
 void *operator new(size_t size)
 {
 	return MemoryManage::getInstance().allocMem(size);

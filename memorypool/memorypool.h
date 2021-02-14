@@ -2,6 +2,7 @@
 #ifndef _MEMORYPOOL_H_
 #define _MEMORYPOOL_H_
 #include <cstdlib>
+#include <mutex>
 
 
 #ifdef _DEBUG
@@ -11,7 +12,7 @@
 	#define xCout(...)
 #endif
 
-const int MAX_MEMORY_SIZE = 64;
+const int MAX_MEMORY_SIZE = 1024;
 
 class MemoryAlloc;
 
@@ -56,6 +57,7 @@ protected:
 	size_t nSize;
 	//内存单元数量
 	size_t nBlockSize;
+	std::mutex m;
 };
 
 template<size_t nsize,size_t nblockSize>
@@ -84,6 +86,11 @@ private:
 	//将构造方法声明为私有
 	MemoryManage(){
 		init(0, 64, &mem64);
+		init(65, 128, &mem128);
+		init(129, 256, &mem256);
+		init(257, 512, &mem512);
+		init(513, 1024, &mem1024);
+
 	}
 	~MemoryManage(){}
 	MemoryManage(MemoryManage&) = delete;//删除拷贝构造函数
@@ -91,7 +98,11 @@ private:
 private:
 	//内存池映射数组初始化
 	void init(int, int, MemoryAlloc *);
-	MemoryAllocator<64, 12> mem64;
+	MemoryAllocator<64, 100000> mem64;
+	MemoryAllocator<128, 100000> mem128;
+	MemoryAllocator<256, 100000> mem256;
+	MemoryAllocator<512, 100000> mem512;
+	MemoryAllocator<1024, 100000> mem1024;
 	MemoryAlloc* szAlloc[MAX_MEMORY_SIZE + 1];
 };
 #endif

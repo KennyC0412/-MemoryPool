@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Alloc.h" />
+    <ClInclude Include="CELLtimestamp.hpp" />
     <ClInclude Include="memorypool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

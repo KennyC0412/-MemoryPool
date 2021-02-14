@@ -1,15 +1,32 @@
 #include <cstdlib>
 #include "Alloc.h"
+#include <iostream>
+#include <thread>
+#include "CELLtimestamp.hpp"
 
+
+const int nCount = 1000000;
+const int tCount = 4;
+const int mCount = nCount / tCount;
+
+char* data[nCount];
+
+void work(int begin,int end)
+{
+	for (int i = begin; i < end; ++i) {
+		data[i] = new char[rand() % 1024 +1];
+	}
+}
 int main()
 {
-	char* data[20];
-	for (auto i = 0; i < 20; ++i) {
-		data[i] = new char[64];
+	CELLTimestamp t;
+	t.update();
+	for (int i = 0; i < tCount; ++i) {
+		std::thread t(work, mCount * i, mCount * (i + 1));
+		t.detach();
 	}
-	for (auto i = 0; i < 20; ++i) {
-		delete []data[i];
-	}
+	std::cout << t.getElapsedTimeInMilliSec();
 
+	delete []data;
 	return 0;
 }
